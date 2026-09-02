@@ -31,6 +31,9 @@ export default function OrderCard({
         >
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-medium text-cream leading-snug">
+              <span className="text-muted font-normal">
+                #{order.numero_orden}
+              </span>{" "}
               {order.nombre}
             </p>
             <SourceBadge source={order.source} />
@@ -49,6 +52,16 @@ export default function OrderCard({
               <>
                 <p>{order.ciudad}</p>
                 <p className="truncate">{order.direccion}</p>
+                {order.costo_total != null && (
+                  <p>
+                    {order.costo_total.toLocaleString("es-CO", {
+                      style: "currency",
+                      currency: "COP",
+                      maximumFractionDigits: 0,
+                    })}
+                    {order.pago_confirmado ? " · Pago ✓" : " · Pago pendiente"}
+                  </p>
+                )}
               </>
             )}
 

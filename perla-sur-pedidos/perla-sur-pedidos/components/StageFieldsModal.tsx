@@ -1,28 +1,39 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { Order, Stage } from "@/lib/types";
+import type { DetalleOrdenRow, Order, Stage } from "@/lib/types";
 import Modal from "./Modal";
+import DetalleOrdenEditor from "./DetalleOrdenEditor";
 
 const TITLES: Record<Stage, string> = {
-  preguntar: "Escribieron a preguntar",
-  realizado: "Pedido realizado",
-  enviado: "Pedido enviado",
+  preguntar: "Procesando",
+  realizado: "Realizado",
+  enviado: "Enviado",
 };
 
 export default function StageFieldsModal({
   order,
   targetStage,
+  initialDetalleRows,
   onClose,
   onConfirm,
 }: {
   order: Order;
   targetStage: Stage;
+  initialDetalleRows: DetalleOrdenRow[];
   onClose: () => void;
-  onConfirm: (fields: Record<string, string>) => Promise<void>;
+  onConfirm: (
+    fields: Record<string, string | number>,
+    detalleRows?: DetalleOrdenRow[]
+  ) => Promise<void>;
 }) {
   const [ciudad, setCiudad] = useState(order.ciudad ?? "");
   const [direccion, setDireccion] = useState(order.direccion ?? "");
+  const [costoTotal, setCostoTotal] = useState(
+    order.costo_total != null ? String(order.costo_total) : ""
+  );
+  const [detalleRows, setDetalleRows] =
+    useState<DetalleOrdenRow[]>(initialDetalleRows);
   const [numeroGuia, setNumeroGuia] = useState(order.numero_guia ?? "");
   const [empresaEnvio, setEmpresaEnvio] = useState(order.empresa_envio ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -32,14 +43,29 @@ export default function StageFieldsModal({
     e.preventDefault();
     setError(null);
 
-    let fields: Record<string, string> = {};
+    let fields: Record<string, string | number> = {};
+    let rowsToSave: DetalleOrdenRow[] | undefined;
 
     if (targetStage === "realizado") {
       if (!ciudad.trim() || !direccion.trim()) {
         setError("Ciudad y dirección son obligatorias.");
         return;
       }
-      fields = { ciudad: ciudad.trim(), direccion: direccion.trim() };
+      if (!costoTotal.trim() || Number(costoTotal) <= 0) {
+        setError("El costo total es obligatorio.");
+        return;
+      }
+      const validRows = detalleRows.filter((r) => r.producto.trim());
+      if (validRows.length === 0) {
+        setError("Agrega al menos un producto en el detalle del pedido.");
+        return;
+      }
+      fields = {
+        ciudad: ciudad.trim(),
+        direccion: direccion.trim(),
+        costo_total: Number(costoTotal),
+      };
+      rowsToSave = validRows;
     }
 
     if (targetStage === "enviado") {
@@ -55,7 +81,7 @@ export default function StageFieldsModal({
 
     startTransition(async () => {
       try {
-        await onConfirm(fields);
+        await onConfirm(fields, rowsToSave);
         onClose();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Algo salió mal.");
@@ -88,6 +114,24 @@ export default function StageFieldsModal({
                 className="w-full rounded-md border border-border bg-surfaceRaised px-3 py-2 text-cream focus:border-turmeric"
               />
             </label>
+            <label className="block">
+              <span className="text-sm text-muted mb-2 block">
+                Costo total
+              </span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                value={costoTotal}
+                onChange={(e) => setCostoTotal(e.target.value)}
+                className="w-full rounded-md border border-border bg-surfaceRaised px-3 py-2 text-cream focus:border-turmeric"
+                placeholder="0"
+              />
+            </label>
+
+            <div className="rounded-md border border-border bg-surfaceRaised p-3">
+              <DetalleOrdenEditor rows={detalleRows} onChange={setDetalleRows} />
+            </div>
           </>
         )}
 
@@ -120,12 +164,12 @@ export default function StageFieldsModal({
 
         {targetStage === "preguntar" && (
           <p className="text-sm text-muted">
-            Se moverá de vuelta a &ldquo;Escribieron a preguntar&rdquo;, sin
-            perder los datos ya guardados.
+            Se moverá de vuelta a &ldquo;Procesando&rdquo;, sin perder los
+            datos ya guardados.
           </p>
         )}
 
-        {error && <p className="text-sm text-achiote">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <div className="flex justify-end gap-2 pt-2">
           <button
@@ -138,7 +182,7 @@ export default function StageFieldsModal({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-ink hover:opacity-90 disabled:opacity-50"
+            className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
             {isPending ? "Moviendo…" : "Mover pedido"}
           </button>

@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DragDropContext, Droppable, type DropResult } from "@hello-pangea/dnd";
-import type { Order, Stage, UserName } from "@/lib/types";
+import type { DetalleOrdenItem, DetalleOrdenRow, Order, Stage, UserName } from "@/lib/types";
 import { STAGES } from "@/lib/types";
 import {
   createOrder,
   moveOrderStage,
   updateOrderFields,
+  saveDetalleOrden,
   deleteOrder,
   logout,
 } from "@/app/board/actions";
@@ -23,8 +24,8 @@ const NEXT_STAGE: Record<Stage, Stage | null> = {
 };
 
 const NEXT_LABEL: Record<Stage, string> = {
-  preguntar: "Pedido realizado",
-  realizado: "Pedido enviado",
+  preguntar: "Realizado",
+  realizado: "Enviado",
   enviado: "",
 };
 
@@ -32,21 +33,44 @@ function needsExtraFields(target: Stage): boolean {
   return target === "realizado" || target === "enviado";
 }
 
-function hasRequiredFields(order: Order, target: Stage): boolean {
-  if (target === "realizado") return !!order.ciudad && !!order.direccion;
+function hasRequiredFields(
+  order: Order,
+  target: Stage,
+  detalleCount: number
+): boolean {
+  if (target === "realizado") {
+    return (
+      !!order.ciudad &&
+      !!order.direccion &&
+      order.costo_total != null &&
+      detalleCount > 0
+    );
+  }
   if (target === "enviado")
     return !!order.numero_guia && !!order.empresa_envio;
   return true;
 }
 
+function itemsToRows(items: DetalleOrdenItem[]): DetalleOrdenRow[] {
+  return items.map((item) => ({
+    key: item.id,
+    producto: item.producto,
+    precio: item.precio,
+    descuento: item.descuento,
+  }));
+}
+
 export default function Board({
   initialOrders,
+  initialDetalleByOrder,
   currentUser,
 }: {
   initialOrders: Order[];
+  initialDetalleByOrder: Record<string, DetalleOrdenItem[]>;
   currentUser: UserName;
 }) {
   const [orders, setOrders] = useState(initialOrders);
+  const [detalleByOrder, setDetalleByOrder] = useState(initialDetalleByOrder);
   const [showNew, setShowNew] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [pendingMove, setPendingMove] = useState<{
@@ -57,6 +81,10 @@ export default function Board({
   useEffect(() => {
     setOrders(initialOrders);
   }, [initialOrders]);
+
+  useEffect(() => {
+    setDetalleByOrder(initialDetalleByOrder);
+  }, [initialDetalleByOrder]);
 
   const columns = useMemo(() => {
     const grouped: Record<Stage, Order[]> = {
@@ -77,14 +105,40 @@ export default function Board({
   async function performMove(
     order: Order,
     target: Stage,
-    extraFields?: Record<string, string>
+    extraFields?: Record<string, string | number>,
+    detalleRows?: DetalleOrdenRow[]
   ) {
-    applyLocalMove(order.id, target, extraFields);
+    applyLocalMove(order.id, target, extraFields as Partial<Order>);
     await moveOrderStage(order.id, target, extraFields);
+
+    if (detalleRows) {
+      const items = detalleRows.map(({ producto, precio, descuento }) => ({
+        producto,
+        precio,
+        descuento,
+      }));
+      setDetalleByOrder((prev) => ({
+        ...prev,
+        [order.id]: detalleRows.map((r) => ({
+          id: r.key,
+          order_id: order.id,
+          producto: r.producto,
+          precio: r.precio,
+          descuento: r.descuento,
+          costo_total_orden: r.precio - r.descuento,
+          created_at: new Date().toISOString(),
+        })),
+      }));
+      await saveDetalleOrden(order.id, items);
+    }
   }
 
   function requestMove(order: Order, target: Stage) {
-    if (needsExtraFields(target) && !hasRequiredFields(order, target)) {
+    const detalleCount = detalleByOrder[order.id]?.length ?? 0;
+    if (
+      needsExtraFields(target) &&
+      !hasRequiredFields(order, target, detalleCount)
+    ) {
       setPendingMove({ order, target });
       return;
     }
@@ -206,9 +260,17 @@ export default function Board({
         <StageFieldsModal
           order={pendingMove.order}
           targetStage={pendingMove.target}
+          initialDetalleRows={itemsToRows(
+            detalleByOrder[pendingMove.order.id] ?? []
+          )}
           onClose={() => setPendingMove(null)}
-          onConfirm={async (fields) => {
-            await performMove(pendingMove.order, pendingMove.target, fields);
+          onConfirm={async (fields, detalleRows) => {
+            await performMove(
+              pendingMove.order,
+              pendingMove.target,
+              fields,
+              detalleRows
+            );
           }}
         />
       )}
@@ -216,14 +278,36 @@ export default function Board({
       {editingOrder && (
         <EditOrderModal
           order={editingOrder}
+          initialDetalleRows={itemsToRows(
+            detalleByOrder[editingOrder.id] ?? []
+          )}
           onClose={() => setEditingOrder(null)}
-          onSave={async (fields) => {
+          onSave={async (fields, detalleRows) => {
             setOrders((prev) =>
               prev.map((o) =>
                 o.id === editingOrder.id ? { ...o, ...fields } : o
               )
             );
             await updateOrderFields(editingOrder.id, fields);
+
+            const items = detalleRows.map(({ producto, precio, descuento }) => ({
+              producto,
+              precio,
+              descuento,
+            }));
+            setDetalleByOrder((prev) => ({
+              ...prev,
+              [editingOrder.id]: detalleRows.map((r) => ({
+                id: r.key,
+                order_id: editingOrder.id,
+                producto: r.producto,
+                precio: r.precio,
+                descuento: r.descuento,
+                costo_total_orden: r.precio - r.descuento,
+                created_at: new Date().toISOString(),
+              })),
+            }));
+            await saveDetalleOrden(editingOrder.id, items);
           }}
           onDelete={async () => {
             setOrders((prev) => prev.filter((o) => o.id !== editingOrder.id));

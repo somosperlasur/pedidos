@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { Order, Source } from "@/lib/types";
-import { SOURCES } from "@/lib/types";
+import type { DetalleOrdenRow, Order, Source } from "@/lib/types";
+import { SOURCES, STAGES } from "@/lib/types";
 import Modal from "./Modal";
+import DetalleOrdenEditor from "./DetalleOrdenEditor";
 
 export default function EditOrderModal({
   order,
+  initialDetalleRows,
   onClose,
   onSave,
   onDelete,
 }: {
   order: Order;
+  initialDetalleRows: DetalleOrdenRow[];
   onClose: () => void;
-  onSave: (fields: Partial<Order>) => Promise<void>;
+  onSave: (
+    fields: Partial<Order>,
+    detalleRows: DetalleOrdenRow[]
+  ) => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
   const [nombre, setNombre] = useState(order.nombre);
@@ -24,9 +30,18 @@ export default function EditOrderModal({
   const [direccion, setDireccion] = useState(order.direccion ?? "");
   const [numeroGuia, setNumeroGuia] = useState(order.numero_guia ?? "");
   const [empresaEnvio, setEmpresaEnvio] = useState(order.empresa_envio ?? "");
+  const [costoTotal, setCostoTotal] = useState(
+    order.costo_total != null ? String(order.costo_total) : ""
+  );
+  const [pagoConfirmado, setPagoConfirmado] = useState(order.pago_confirmado);
+  const [detalleRows, setDetalleRows] =
+    useState<DetalleOrdenRow[]>(initialDetalleRows);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const stageLabel =
+    STAGES.find((s) => s.id === order.stage)?.label ?? order.stage;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,16 +54,21 @@ export default function EditOrderModal({
 
     startTransition(async () => {
       try {
-        await onSave({
-          nombre: nombre.trim(),
-          source,
-          celular: celular.trim() || null,
-          usuario_instagram: usuario.trim() || null,
-          ciudad: ciudad.trim() || null,
-          direccion: direccion.trim() || null,
-          numero_guia: numeroGuia.trim() || null,
-          empresa_envio: empresaEnvio.trim() || null,
-        });
+        await onSave(
+          {
+            nombre: nombre.trim(),
+            source,
+            celular: celular.trim() || null,
+            usuario_instagram: usuario.trim() || null,
+            ciudad: ciudad.trim() || null,
+            direccion: direccion.trim() || null,
+            numero_guia: numeroGuia.trim() || null,
+            empresa_envio: empresaEnvio.trim() || null,
+            costo_total: costoTotal.trim() ? Number(costoTotal) : null,
+            pago_confirmado: pagoConfirmado,
+          },
+          detalleRows.filter((r) => r.producto.trim())
+        );
         onClose();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Algo salió mal.");
@@ -70,6 +90,18 @@ export default function EditOrderModal({
   return (
     <Modal title="Detalle del pedido" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex items-center justify-between rounded-md border border-border bg-surfaceRaised px-3 py-2">
+          <span className="text-sm text-muted">
+            Orden{" "}
+            <span className="font-medium text-cream">
+              #{order.numero_orden}
+            </span>
+          </span>
+          <span className="text-xs rounded-full border border-orange/40 bg-orange/10 px-2 py-0.5 text-orange">
+            {stageLabel}
+          </span>
+        </div>
+
         <div>
           <span className="text-sm text-muted mb-2 block">Fuente</span>
           <div className="grid grid-cols-3 gap-2">
@@ -160,6 +192,36 @@ export default function EditOrderModal({
           </label>
         </div>
 
+        <div className="grid grid-cols-2 gap-3 items-end">
+          <label className="block">
+            <span className="text-sm text-muted mb-2 block">
+              Costo total
+            </span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              value={costoTotal}
+              onChange={(e) => setCostoTotal(e.target.value)}
+              className="w-full rounded-md border border-border bg-surfaceRaised px-3 py-2 text-cream focus:border-turmeric"
+              placeholder="0"
+            />
+          </label>
+          <label className="flex items-center gap-2 pb-2.5">
+            <input
+              type="checkbox"
+              checked={pagoConfirmado}
+              onChange={(e) => setPagoConfirmado(e.target.checked)}
+              className="h-4 w-4 rounded border-border accent-orange"
+            />
+            <span className="text-sm text-cream">Pago confirmado</span>
+          </label>
+        </div>
+
+        <div className="rounded-md border border-border bg-surfaceRaised p-3">
+          <DetalleOrdenEditor rows={detalleRows} onChange={setDetalleRows} />
+        </div>
+
         <p className="text-xs text-muted">
           Registrado por {order.owner} ·{" "}
           {new Date(order.created_at).toLocaleDateString("es-CO", {
@@ -169,7 +231,7 @@ export default function EditOrderModal({
           })}
         </p>
 
-        {error && <p className="text-sm text-achiote">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <div className="flex items-center justify-between gap-2 pt-2">
           {confirmDelete ? (
@@ -179,7 +241,7 @@ export default function EditOrderModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={isPending}
-                className="rounded-md border border-achiote px-3 py-1.5 text-xs text-achiote hover:bg-achiote/10"
+                className="rounded-md border border-danger px-3 py-1.5 text-xs text-danger hover:bg-danger/10"
               >
                 Sí, eliminar
               </button>
@@ -195,7 +257,7 @@ export default function EditOrderModal({
             <button
               type="button"
               onClick={() => setConfirmDelete(true)}
-              className="text-xs text-muted hover:text-achiote"
+              className="text-xs text-muted hover:text-danger"
             >
               Eliminar pedido
             </button>
@@ -212,7 +274,7 @@ export default function EditOrderModal({
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-ink hover:opacity-90 disabled:opacity-50"
+              className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
             >
               {isPending ? "Guardando…" : "Guardar cambios"}
             </button>
