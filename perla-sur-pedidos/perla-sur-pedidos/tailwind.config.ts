@@ -5,39 +5,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#0B0B0A",
-        surface: "#161310",
-        surfaceRaised: "#1E1912",
-        border: "#2E2820",
-        cream: "#F2EDE2",
-        muted: "#A79A85",
-        turmeric: "#C9A227",
-        herb: "#8A9A5B",
-        achiote: "#B5482A",
+        // Perla Sur brand palette (sampled from somosperlasur.com and the logo files)
+        paper: "#F7E6D5", // page background — light peachy cream
+        navPeach: "#F2DAC4", // header strip / deeper cream
+        surface: "#FFFFFF", // cards
+        surfaceRaised: "#F0DEC5", // inputs / raised fields
+        border: "#E3C9A8", // warm tan borders
+        ink: "#23332F", // primary text — dark teal-charcoal
+        muted: "#748883", // secondary text — muted sage
+        orange: "#E85319", // primary accent (their CTA / heading color)
+        teal: "#05625B", // secondary accent
+        forest: "#303923", // dark olive green (their hero/header color)
+        logoPeach: "#F3D1BA", // the wordmark's peach tone, for use on dark bg
+        danger: "#B3261E", // errors / delete actions (kept separate from brand green)
+
+        // legacy token names kept as aliases so existing classes still work
+        cream: "#23332F",
+        turmeric: "#E85319",
+        herb: "#05625B",
+        achiote: "#303923",
       },
       fontFamily: {
-        display: [
-          "Iowan Old Style",
-          "Palatino Linotype",
-          "URW Palladio L",
-          "P052",
-          "serif",
-        ],
-        sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "Roboto",
-          "Helvetica Neue",
-          "Arial",
-          "sans-serif",
-        ],
+        display: ["Fraunces", "serif"],
+        sans: ["Poppins", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 0 0 rgba(242,237,226,0.04) inset, 0 8px 20px -12px rgba(0,0,0,0.6)",
+        card: "0 1px 0 0 rgba(255,255,255,0.6) inset, 0 8px 20px -14px rgba(48,57,35,0.35)",
       },
     },
   },
   plugins: [],
 };
 export default config;
+
