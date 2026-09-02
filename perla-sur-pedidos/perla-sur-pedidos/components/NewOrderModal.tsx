@@ -113,7 +113,7 @@ export default function NewOrderModal({
           </label>
         )}
 
-        {error && <p className="text-sm text-achiote">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <div className="flex justify-end gap-2 pt-2">
           <button
@@ -126,7 +126,7 @@ export default function NewOrderModal({
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-ink hover:opacity-90 disabled:opacity-50"
+            className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
             {isPending ? "Guardando…" : "Registrar"}
           </button>
