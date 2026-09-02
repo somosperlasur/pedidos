@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import type { Order } from "@/lib/types";
+import type { DetalleOrdenItem, Order } from "@/lib/types";
 import Board from "@/components/Board";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +10,18 @@ export default async function BoardPage() {
   const session = getSession();
   if (!session) redirect("/login");
 
-  const { data, error } = await supabaseAdmin
-    .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [ordersRes, detalleRes] = await Promise.all([
+    supabaseAdmin
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabaseAdmin
+      .from("detalle_orden")
+      .select("*")
+      .order("created_at", { ascending: true }),
+  ]);
+
+  const error = ordersRes.error ?? detalleRes.error;
 
   if (error) {
     const cause = (error as unknown as { cause?: unknown }).cause;
@@ -38,5 +46,16 @@ export default async function BoardPage() {
     );
   }
 
-  return <Board initialOrders={(data ?? []) as Order[]} currentUser={session.user} />;
+  const detalleByOrder: Record<string, DetalleOrdenItem[]> = {};
+  for (const item of (detalleRes.data ?? []) as DetalleOrdenItem[]) {
+    (detalleByOrder[item.order_id] ??= []).push(item);
+  }
+
+  return (
+    <Board
+      initialOrders={(ordersRes.data ?? []) as Order[]}
+      initialDetalleByOrder={detalleByOrder}
+      currentUser={session.user}
+    />
+  );
 }
