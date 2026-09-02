@@ -27,7 +27,7 @@ export default async function BoardPage() {
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-achiote">
+          <p className="text-danger">
             No se pudieron cargar los pedidos: {error.message}
           </p>
           {causeMessage && (
