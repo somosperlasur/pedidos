@@ -16,11 +16,24 @@ export default async function BoardPage() {
     .order("created_at", { ascending: false });
 
   if (error) {
+    const cause = (error as unknown as { cause?: unknown }).cause;
+    const causeMessage =
+      cause instanceof Error
+        ? cause.message
+        : cause
+        ? JSON.stringify(cause)
+        : null;
+
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
-        <p className="text-achiote">
-          No se pudieron cargar los pedidos: {error.message}
-        </p>
+        <div className="text-center">
+          <p className="text-achiote">
+            No se pudieron cargar los pedidos: {error.message}
+          </p>
+          {causeMessage && (
+            <p className="mt-2 text-sm text-muted">Detalle: {causeMessage}</p>
+          )}
+        </div>
       </main>
     );
   }
