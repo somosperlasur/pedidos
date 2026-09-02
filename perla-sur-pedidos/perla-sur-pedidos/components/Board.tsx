@@ -113,24 +113,27 @@ export default function Board({
 
   return (
     <main className="min-h-screen">
-      <header className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <div>
-          <p className="font-display text-xl text-cream">Perla Sur</p>
-          <p className="text-xs text-muted">Pedidos internos</p>
+      <header className="bg-forest px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-wordmark.png" alt="Perla Sur" className="h-9 w-auto" />
+          <p className="text-xs text-logoPeach/70 hidden sm:block">
+            Pedidos internos
+          </p>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowNew(true)}
-            className="rounded-md bg-turmeric px-4 py-2 text-sm font-medium text-ink hover:opacity-90"
+            className="rounded-md bg-orange px-4 py-2 text-sm font-medium text-white hover:opacity-90"
           >
             + Nuevo pedido
           </button>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted">{currentUser}</span>
+            <span className="text-sm text-logoPeach/80">{currentUser}</span>
             <form action={logout}>
               <button
                 type="submit"
-                className="text-xs text-muted hover:text-achiote"
+                className="text-xs text-logoPeach/60 hover:text-white"
               >
                 Salir
               </button>
@@ -148,11 +151,11 @@ export default function Board({
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={`rounded-lg border border-border p-3 min-h-[60vh] transition-colors ${
-                    snapshot.isDraggingOver ? "bg-surfaceRaised" : "bg-ink"
+                    snapshot.isDraggingOver ? "bg-surfaceRaised" : "bg-paper"
                   }`}
                 >
                   <div className="mb-3 flex items-center justify-between px-1">
-                    <h2 className="text-sm font-medium text-cream">
+                    <h2 className="text-sm font-medium text-ink">
                       {stage.label}
                     </h2>
                     <span className="text-xs text-muted">
