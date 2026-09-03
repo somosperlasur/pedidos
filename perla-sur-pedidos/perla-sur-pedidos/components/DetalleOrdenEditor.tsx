@@ -87,3 +87,71 @@ export default function DetalleOrdenEditor({
                     <span className="text-[10px] text-muted">Unidades</span>
                     <input
                       type="number"
+                      inputMode="numeric"
+                      min={0}
+                      value={row.unidades || ""}
+                      onChange={(e) =>
+                        updateRow(row.key, {
+                          unidades: Number(e.target.value),
+                        })
+                      }
+                      placeholder="1"
+                      className="w-full rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] text-muted">
+                      Costo unitario
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      value={row.costo_unitario || ""}
+                      onChange={(e) =>
+                        updateRow(row.key, {
+                          costo_unitario: Number(e.target.value),
+                        })
+                      }
+                      placeholder="0"
+                      className="w-full rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-[10px] text-muted">Descuento</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      value={row.descuento || ""}
+                      onChange={(e) =>
+                        updateRow(row.key, {
+                          descuento: Number(e.target.value),
+                        })
+                      }
+                      placeholder="0"
+                      className="w-full rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
+                    />
+                  </label>
+                </div>
+                <p className="text-right text-xs text-muted">
+                  Total producto:{" "}
+                  <span className="text-ink font-medium">
+                    {money(rowTotal)}
+                  </span>
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <p className="text-right text-sm text-ink border-t border-border pt-2">
+          Total productos:{" "}
+          <span className="font-medium">{money(total)}</span>
+        </p>
+      )}
+    </div>
+  );
+}
