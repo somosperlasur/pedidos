@@ -6,7 +6,8 @@ function newRow(): DetalleOrdenRow {
   return {
     key: Math.random().toString(36).slice(2),
     producto: "",
-    precio: 0,
+    unidades: 1,
+    costo_unitario: 0,
     descuento: 0,
   };
 }
@@ -27,7 +28,7 @@ export default function DetalleOrdenEditor({
   onChange: (rows: DetalleOrdenRow[]) => void;
 }) {
   const total = rows.reduce(
-    (sum, r) => sum + (r.precio - r.descuento || 0),
+    (sum, r) => sum + ((r.unidades || 0) * r.costo_unitario - r.descuento || 0),
     0
   );
 
@@ -58,60 +59,31 @@ export default function DetalleOrdenEditor({
         </p>
       ) : (
         <div className="space-y-2 mb-2">
-          {rows.map((row) => (
-            <div
-              key={row.key}
-              className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center"
-            >
-              <input
-                value={row.producto}
-                onChange={(e) =>
-                  updateRow(row.key, { producto: e.target.value })
-                }
-                placeholder="Producto"
-                className="rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
-              />
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                value={row.precio || ""}
-                onChange={(e) =>
-                  updateRow(row.key, { precio: Number(e.target.value) })
-                }
-                placeholder="Precio"
-                className="w-24 rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
-              />
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                value={row.descuento || ""}
-                onChange={(e) =>
-                  updateRow(row.key, { descuento: Number(e.target.value) })
-                }
-                placeholder="Descuento"
-                className="w-24 rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
-              />
-              <button
-                type="button"
-                onClick={() => removeRow(row.key)}
-                aria-label="Quitar producto"
-                className="text-muted hover:text-danger px-1"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {rows.length > 0 && (
-        <p className="text-right text-sm text-ink">
-          Total productos:{" "}
-          <span className="font-medium">{money(total)}</span>
-        </p>
-      )}
-    </div>
-  );
-}
+          {rows.map((row) => {
+            const rowTotal =
+              (row.unidades || 0) * row.costo_unitario - row.descuento;
+            return (
+              <div key={row.key} className="space-y-1">
+                <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
+                  <input
+                    value={row.producto}
+                    onChange={(e) =>
+                      updateRow(row.key, { producto: e.target.value })
+                    }
+                    placeholder="Producto"
+                    className="rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeRow(row.key)}
+                    aria-label="Quitar producto"
+                    className="text-muted hover:text-danger px-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <label className="block">
+                    <span className="text-[10px] text-muted">Unidades</span>
+                    <input
+                      type="number"
