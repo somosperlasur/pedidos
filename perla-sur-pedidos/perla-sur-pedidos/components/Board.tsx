@@ -43,6 +43,7 @@ function hasRequiredFields(
       !!order.ciudad &&
       !!order.direccion &&
       order.costo_total != null &&
+      !!order.metodo_pago &&
       detalleCount > 0
     );
   }
@@ -55,7 +56,8 @@ function itemsToRows(items: DetalleOrdenItem[]): DetalleOrdenRow[] {
   return items.map((item) => ({
     key: item.id,
     producto: item.producto,
-    precio: item.precio,
+    unidades: item.unidades,
+    costo_unitario: item.costo_unitario,
     descuento: item.descuento,
   }));
 }
@@ -112,20 +114,24 @@ export default function Board({
     await moveOrderStage(order.id, target, extraFields);
 
     if (detalleRows) {
-      const items = detalleRows.map(({ producto, precio, descuento }) => ({
-        producto,
-        precio,
-        descuento,
-      }));
+      const items = detalleRows.map(
+        ({ producto, unidades, costo_unitario, descuento }) => ({
+          producto,
+          unidades,
+          costo_unitario,
+          descuento,
+        })
+      );
       setDetalleByOrder((prev) => ({
         ...prev,
         [order.id]: detalleRows.map((r) => ({
           id: r.key,
           order_id: order.id,
           producto: r.producto,
-          precio: r.precio,
+          unidades: r.unidades,
+          costo_unitario: r.costo_unitario,
           descuento: r.descuento,
-          costo_total_orden: r.precio - r.descuento,
+          total_producto: r.unidades * r.costo_unitario - r.descuento,
           created_at: new Date().toISOString(),
         })),
       }));
@@ -290,20 +296,24 @@ export default function Board({
             );
             await updateOrderFields(editingOrder.id, fields);
 
-            const items = detalleRows.map(({ producto, precio, descuento }) => ({
-              producto,
-              precio,
-              descuento,
-            }));
+            const items = detalleRows.map(
+              ({ producto, unidades, costo_unitario, descuento }) => ({
+                producto,
+                unidades,
+                costo_unitario,
+                descuento,
+              })
+            );
             setDetalleByOrder((prev) => ({
               ...prev,
               [editingOrder.id]: detalleRows.map((r) => ({
                 id: r.key,
                 order_id: editingOrder.id,
                 producto: r.producto,
-                precio: r.precio,
+                unidades: r.unidades,
+                costo_unitario: r.costo_unitario,
                 descuento: r.descuento,
-                costo_total_orden: r.precio - r.descuento,
+                total_producto: r.unidades * r.costo_unitario - r.descuento,
                 created_at: new Date().toISOString(),
               })),
             }));

@@ -2,6 +2,7 @@
 
 import { Draggable } from "@hello-pangea/dnd";
 import type { Order } from "@/lib/types";
+import { METODOS_PAGO } from "@/lib/types";
 import { SourceBadge, OwnerBadge } from "./Badges";
 
 export default function OrderCard({
@@ -60,6 +61,14 @@ export default function OrderCard({
                       maximumFractionDigits: 0,
                     })}
                     {order.pago_confirmado ? " · Pago ✓" : " · Pago pendiente"}
+                  </p>
+                )}
+                {order.metodo_pago && (
+                  <p>
+                    {
+                      METODOS_PAGO.find((m) => m.id === order.metodo_pago)
+                        ?.label
+                    }
                   </p>
                 )}
               </>

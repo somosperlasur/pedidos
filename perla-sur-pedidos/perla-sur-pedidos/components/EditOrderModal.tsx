@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { DetalleOrdenRow, Order, Source } from "@/lib/types";
-import { SOURCES, STAGES } from "@/lib/types";
+import type { DetalleOrdenRow, MetodoPago, Order, Source } from "@/lib/types";
+import { METODOS_PAGO, SOURCES, STAGES } from "@/lib/types";
 import Modal from "./Modal";
 import DetalleOrdenEditor from "./DetalleOrdenEditor";
 
@@ -34,6 +34,9 @@ export default function EditOrderModal({
     order.costo_total != null ? String(order.costo_total) : ""
   );
   const [pagoConfirmado, setPagoConfirmado] = useState(order.pago_confirmado);
+  const [metodoPago, setMetodoPago] = useState<MetodoPago | null>(
+    order.metodo_pago
+  );
   const [detalleRows, setDetalleRows] =
     useState<DetalleOrdenRow[]>(initialDetalleRows);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -66,6 +69,7 @@ export default function EditOrderModal({
             empresa_envio: empresaEnvio.trim() || null,
             costo_total: costoTotal.trim() ? Number(costoTotal) : null,
             pago_confirmado: pagoConfirmado,
+            metodo_pago: metodoPago,
           },
           detalleRows.filter((r) => r.producto.trim())
         );
@@ -104,7 +108,7 @@ export default function EditOrderModal({
 
         <div>
           <span className="text-sm text-muted mb-2 block">Fuente</span>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {SOURCES.map((s) => (
               <button
                 type="button"
@@ -216,6 +220,28 @@ export default function EditOrderModal({
             />
             <span className="text-sm text-cream">Pago confirmado</span>
           </label>
+        </div>
+
+        <div>
+          <span className="text-sm text-muted mb-2 block">
+            Método de pago
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            {METODOS_PAGO.map((m) => (
+              <button
+                type="button"
+                key={m.id}
+                onClick={() => setMetodoPago(m.id)}
+                className={`rounded-md border py-2 text-sm transition-colors ${
+                  metodoPago === m.id
+                    ? "border-turmeric text-turmeric bg-turmeric/10"
+                    : "border-border text-muted bg-surfaceRaised"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="rounded-md border border-border bg-surfaceRaised p-3">

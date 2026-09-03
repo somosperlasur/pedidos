@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { DetalleOrdenRow, Order, Stage } from "@/lib/types";
+import type { DetalleOrdenRow, MetodoPago, Order, Stage } from "@/lib/types";
+import { METODOS_PAGO } from "@/lib/types";
 import Modal from "./Modal";
 import DetalleOrdenEditor from "./DetalleOrdenEditor";
 
@@ -32,6 +33,9 @@ export default function StageFieldsModal({
   const [costoTotal, setCostoTotal] = useState(
     order.costo_total != null ? String(order.costo_total) : ""
   );
+  const [metodoPago, setMetodoPago] = useState<MetodoPago | null>(
+    order.metodo_pago
+  );
   const [detalleRows, setDetalleRows] =
     useState<DetalleOrdenRow[]>(initialDetalleRows);
   const [numeroGuia, setNumeroGuia] = useState(order.numero_guia ?? "");
@@ -55,6 +59,10 @@ export default function StageFieldsModal({
         setError("El costo total es obligatorio.");
         return;
       }
+      if (!metodoPago) {
+        setError("Selecciona un método de pago.");
+        return;
+      }
       const validRows = detalleRows.filter((r) => r.producto.trim());
       if (validRows.length === 0) {
         setError("Agrega al menos un producto en el detalle del pedido.");
@@ -64,6 +72,7 @@ export default function StageFieldsModal({
         ciudad: ciudad.trim(),
         direccion: direccion.trim(),
         costo_total: Number(costoTotal),
+        metodo_pago: metodoPago,
       };
       rowsToSave = validRows;
     }
@@ -128,6 +137,28 @@ export default function StageFieldsModal({
                 placeholder="0"
               />
             </label>
+
+            <div>
+              <span className="text-sm text-muted mb-2 block">
+                Método de pago
+              </span>
+              <div className="grid grid-cols-2 gap-2">
+                {METODOS_PAGO.map((m) => (
+                  <button
+                    type="button"
+                    key={m.id}
+                    onClick={() => setMetodoPago(m.id)}
+                    className={`rounded-md border py-2 text-sm transition-colors ${
+                      metodoPago === m.id
+                        ? "border-turmeric text-turmeric bg-turmeric/10"
+                        : "border-border text-muted bg-surfaceRaised"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="rounded-md border border-border bg-surfaceRaised p-3">
               <DetalleOrdenEditor rows={detalleRows} onChange={setDetalleRows} />
