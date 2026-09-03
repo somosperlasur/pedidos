@@ -1,4 +1,4 @@
-export type Source = "instagram" | "whatsapp" | "llamada";
+export type Source = "instagram" | "whatsapp" | "llamada" | "ff";
 export type UserName = "Jose" | "Paulina";
 // Internal ids stay the same as before (no data migration needed);
 // only the Spanish labels shown to Jose/Paulina changed.
@@ -14,6 +14,14 @@ export const SOURCES: { id: Source; label: string }[] = [
   { id: "whatsapp", label: "WhatsApp" },
   { id: "instagram", label: "Instagram" },
   { id: "llamada", label: "Llamada" },
+  { id: "ff", label: "F&F" },
+];
+
+export type MetodoPago = "transferencia" | "link_pago";
+
+export const METODOS_PAGO: { id: MetodoPago; label: string }[] = [
+  { id: "transferencia", label: "Transferencia" },
+  { id: "link_pago", label: "Link de Pago" },
 ];
 
 export const USERS: UserName[] = ["Jose", "Paulina"];
@@ -32,6 +40,7 @@ export interface Order {
   empresa_envio: string | null;
   costo_total: number | null;
   pago_confirmado: boolean;
+  metodo_pago: MetodoPago | null;
   stage: Stage;
   created_at: string;
   updated_at: string;
@@ -41,9 +50,10 @@ export interface DetalleOrdenItem {
   id: string;
   order_id: string;
   producto: string;
-  precio: number;
+  unidades: number;
+  costo_unitario: number;
   descuento: number;
-  costo_total_orden: number;
+  total_producto: number;
   created_at: string;
 }
 
@@ -51,7 +61,8 @@ export interface DetalleOrdenItem {
 export interface DetalleOrdenRow {
   key: string; // client-side only, for React list identity
   producto: string;
-  precio: number;
+  unidades: number;
+  costo_unitario: number;
   descuento: number;
 }
 
@@ -66,6 +77,7 @@ export interface RealizadoInput {
   ciudad: string;
   direccion: string;
   costo_total: number;
+  metodo_pago: MetodoPago;
 }
 
 export interface EnviadoInput {
