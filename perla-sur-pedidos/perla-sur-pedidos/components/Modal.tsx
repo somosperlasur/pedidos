@@ -26,8 +26,8 @@ export default function Modal({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-card">
-        <div className="mb-5 flex items-center justify-between">
+      <div className="relative flex w-full max-w-md max-h-[85vh] flex-col rounded-lg border border-border bg-surface shadow-card">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4 shrink-0">
           <h2 className="font-display text-lg text-cream">{title}</h2>
           <button
             type="button"
@@ -38,7 +38,7 @@ export default function Modal({
             ✕
           </button>
         </div>
-        {children}
+        <div className="overflow-y-auto px-6 py-5">{children}</div>
       </div>
     </div>
   );
