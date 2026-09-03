@@ -50,6 +50,7 @@ export async function updateOrderFields(
     empresa_envio: string | null;
     costo_total: number | null;
     pago_confirmado: boolean;
+    metodo_pago: string | null;
     source: Source;
   }>
 ) {
@@ -66,7 +67,12 @@ export async function updateOrderFields(
 
 export async function saveDetalleOrden(
   orderId: string,
-  items: { producto: string; precio: number; descuento: number }[]
+  items: {
+    producto: string;
+    unidades: number;
+    costo_unitario: number;
+    descuento: number;
+  }[]
 ) {
   requireSession();
 
@@ -83,7 +89,10 @@ export async function saveDetalleOrden(
     .map((item) => ({
       order_id: orderId,
       producto: item.producto.trim(),
-      precio: Number.isFinite(item.precio) ? item.precio : 0,
+      unidades: Number.isFinite(item.unidades) ? item.unidades : 1,
+      costo_unitario: Number.isFinite(item.costo_unitario)
+        ? item.costo_unitario
+        : 0,
       descuento: Number.isFinite(item.descuento) ? item.descuento : 0,
     }))
     .filter((item) => item.producto.length > 0);
@@ -106,6 +115,7 @@ export async function moveOrderStage(
     ciudad: string;
     direccion: string;
     costo_total: number;
+    metodo_pago: string;
     numero_guia: string;
     empresa_envio: string;
   }>
