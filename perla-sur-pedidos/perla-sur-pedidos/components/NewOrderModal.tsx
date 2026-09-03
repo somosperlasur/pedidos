@@ -58,11 +58,11 @@ export default function NewOrderModal({
   }
 
   return (
-    <Modal title="Escribieron a preguntar" onClose={onClose}>
+    <Modal title="Procesando" onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <span className="text-sm text-muted mb-2 block">¿Por dónde escribió?</span>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {SOURCES.map((s) => (
               <button
                 type="button"
