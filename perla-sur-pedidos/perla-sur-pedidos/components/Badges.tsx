@@ -13,6 +13,10 @@ const SOURCE_STYLES: Record<Source, { label: string; className: string }> = {
     label: "Llamada",
     className: "text-turmeric border-turmeric/40 bg-turmeric/10",
   },
+  ff: {
+    label: "F&F",
+    className: "text-ink border-ink/30 bg-ink/5",
+  },
 };
 
 export function SourceBadge({ source }: { source: Source }) {
