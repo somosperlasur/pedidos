@@ -81,19 +81,24 @@ export default function SalesDashboard({
             Unidades vendidas por producto{" "}
             <span className="text-muted/70">(pagado y enviado)</span>
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {chartRows.map((row) => (
-              <div key={row.producto} className="flex items-center gap-3">
-                <span className="w-40 shrink-0 text-xs text-ink truncate">
-                  {row.producto}
-                </span>
-                <div className="flex-1 bg-surfaceRaised rounded h-6 relative overflow-hidden">
+              <div key={row.producto}>
+                <div className="flex items-baseline justify-between gap-2 mb-1">
+                  <span className="text-xs text-ink font-medium">
+                    {row.producto}
+                  </span>
+                  <span className="text-[11px] text-muted shrink-0">
+                    {row.unidades} unidades
+                  </span>
+                </div>
+                <div className="w-full bg-surfaceRaised rounded h-6 relative overflow-hidden">
                   <div
                     className="h-full bg-orange rounded flex items-center px-2 transition-all"
                     style={{
                       width: `${Math.max(
                         (row.unidades / maxUnidades) * 100,
-                        6
+                        10
                       )}%`,
                     }}
                   >
@@ -102,9 +107,6 @@ export default function SalesDashboard({
                     </span>
                   </div>
                 </div>
-                <span className="w-12 shrink-0 text-xs text-muted text-right">
-                  {row.unidades}
-                </span>
               </div>
             ))}
           </div>
