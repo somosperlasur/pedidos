@@ -1,6 +1,7 @@
 "use client";
 
 import type { DetalleOrdenRow } from "@/lib/types";
+import { PRODUCTOS } from "@/lib/types";
 
 function newRow(): DetalleOrdenRow {
   return {
@@ -65,14 +66,22 @@ export default function DetalleOrdenEditor({
             return (
               <div key={row.key} className="space-y-1">
                 <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
-                  <input
+                  <select
                     value={row.producto}
                     onChange={(e) =>
                       updateRow(row.key, { producto: e.target.value })
                     }
-                    placeholder="Producto"
                     className="rounded-md border border-border bg-surfaceRaised px-2 py-1.5 text-sm text-ink focus:border-orange"
-                  />
+                  >
+                    <option value="" disabled>
+                      Selecciona un producto
+                    </option>
+                    {PRODUCTOS.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     type="button"
                     onClick={() => removeRow(row.key)}
