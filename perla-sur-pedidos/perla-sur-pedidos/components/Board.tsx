@@ -16,6 +16,7 @@ import OrderCard from "./OrderCard";
 import NewOrderModal from "./NewOrderModal";
 import StageFieldsModal from "./StageFieldsModal";
 import EditOrderModal from "./EditOrderModal";
+import SalesDashboard from "./SalesDashboard";
 
 const NEXT_STAGE: Record<Stage, Stage | null> = {
   preguntar: "realizado",
@@ -201,6 +202,8 @@ export default function Board({
           </div>
         </div>
       </header>
+
+      <SalesDashboard orders={orders} detalleByOrder={detalleByOrder} />
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-3">
