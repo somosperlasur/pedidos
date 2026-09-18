@@ -24,6 +24,19 @@ export const METODOS_PAGO: { id: MetodoPago; label: string }[] = [
   { id: "link_pago", label: "Link de Pago" },
 ];
 
+export const PRODUCTOS: string[] = [
+  "Pimienta Negra Molida - Tubular",
+  "Pimienta Negra Grano - Molinillo",
+  "Pimienta Negra Grano - Doypack",
+  "Sal Pimienta Molida - Tubular",
+  "Sal Marina Gruesa - Tubular",
+  "Sal Pimienta Grano - Molinillo",
+  "Sal Marina Gruesa - Molinillo",
+  "Pimienta Negra Molida - Doypack",
+  "Sal Pimienta Molida - Doypack",
+  "Sal Pimienta Grano - Doypack",
+];
+
 export const USERS: UserName[] = ["Jose", "Paulina"];
 
 export interface Order {
@@ -84,3 +97,4 @@ export interface EnviadoInput {
   numero_guia: string;
   empresa_envio: string;
 }
+
