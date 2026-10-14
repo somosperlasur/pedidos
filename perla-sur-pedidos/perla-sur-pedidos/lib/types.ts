@@ -36,6 +36,7 @@ export const PRODUCTOS: string[] = [
   "Sal Pimienta Molida - Doypack",
   "Sal Pimienta Grano - Doypack",
   "Sal Marina Gruesa - Doypack",
+   "Envio",
 ];
 
 export const USERS: UserName[] = ["Jose", "Paulina"];
